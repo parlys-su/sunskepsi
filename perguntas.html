@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>estudos — sunskepsi</title>
+    <title>perguntas — sunskepsi</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -29,9 +29,9 @@
 
     <section>
 
-        <h2>estudos</h2>
+        <h2>perguntas</h2>
 
-        <div id="lista-estudos">
+        <div id="lista-perguntas">
             <p>carregando...</p>
         </div>
 
@@ -45,9 +45,9 @@
 
 <script>
 
-async function carregarEstudos() {
+async function carregarPerguntas() {
 
-    const lista = document.getElementById("lista-estudos");
+    const lista = document.getElementById("lista-perguntas");
 
     try {
 
@@ -59,18 +59,18 @@ async function carregarEstudos() {
 
         const textos = await resposta.json();
 
-        const estudos = textos.filter(texto =>
-            texto.categoria === "estudos"
+        const perguntas = textos.filter(texto =>
+            texto.categoria === "perguntas"
         );
 
         lista.innerHTML = "";
 
-        if (estudos.length === 0) {
-            lista.innerHTML = "<p>nenhum estudo publicado ainda.</p>";
+        if (perguntas.length === 0) {
+            lista.innerHTML = "<p>nenhuma pergunta publicada ainda.</p>";
             return;
         }
 
-        estudos.forEach(texto => {
+        perguntas.forEach(texto => {
 
             const artigo = document.createElement("article");
 
@@ -94,11 +94,11 @@ async function carregarEstudos() {
         console.error(erro);
 
         lista.innerHTML =
-            "<p>não foi possível carregar os estudos.</p>";
+            "<p>não foi possível carregar as perguntas.</p>";
     }
 }
 
-carregarEstudos();
+carregarPerguntas();
 
 </script>
 
