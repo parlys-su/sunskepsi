@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>estudos — sunskepsi</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>sunskepsi</h1>
+
+    <nav>
+        <a href="index.html">início</a>
+        <a href="arquivo.html">arquivo</a>
+        <a href="fragmentos.html">fragmentos</a>
+        <a href="estudos.html">estudos</a>
+        <a href="perguntas.html">perguntas</a>
+        <a href="sobre.html">sobre</a>
+    </nav>
+</header>
+
+<main>
+
+    <section>
+
+        <h2>estudos</h2>
+
+        <div id="lista-estudos">
+            <p>carregando...</p>
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <span>~sun</span>
+</footer>
+
+
+<script>
+
+const repositorio = "parlys-su/sunskepsi";
+const pasta = "textos";
+
+async function carregarEstudos() {
+
+    const lista = document.getElementById("lista-estudos");
+
+    try {
+
+        const resposta = await fetch(
+            `https://api.github.com/repos/${repositorio}/contents/${pasta}`
+        );
+
+        if (!resposta.ok) {
+            throw new Error("Não foi possível acessar o repositório.");
+        }
+
+        const arquivos = await resposta.json();
+
+        const publicacoes = arquivos.filter(arquivo =>
+            arquivo.name.endsWith(".html") &&
+            arquivo.name !== "modelo.html"
+        );
+
+        const textos = [];
+
+        for (const arquivo of publicacoes) {
+
+            const pagina = await fetch(arquivo.download_url);
+
+            if (!pagina.ok) {
+                continue;
+            }
+
+            const html = await pagina.text();
+
+            const documento = new DOMParser().parseFromString(
+                html,
+                "text/html"
+            );
+
+            const artigo = documento.querySelector("article.texto");
+
+            if (!artigo) {
+                continue;
+            }
+
+            const categoria = artigo.getAttribute("data-categoria");
+
+            if (categoria !== "estudos") {
+                continue;
+            }
+
+            const titulo = artigo.querySelector("h2");
+            const data = artigo.querySelector("time");
+
+            if (!titulo || !data) {
+                continue;
+            }
+
+            textos.push({
+                titulo: titulo.textContent.trim(),
+                data: data.getAttribute("datetime"),
+                dataExibicao: data.textContent.trim(),
+                link: `textos/${arquivo.name}`
+            });
+        }
+
+        textos.sort((a, b) =>
+            new Date(b.data) - new Date(a.data)
+        );
+
+        lista.innerHTML = "";
+
+        if (textos.length === 0) {
+            lista.innerHTML = "<p>nenhum estudo publicado ainda.</p>";
+            return;
+        }
+
+        textos.forEach(texto => {
+
+            const artigo = document.createElement("article");
+
+            artigo.innerHTML = `
+                <h3>
+                    <a href="${texto.link}">
+                        ${texto.titulo}
+                    </a>
+                </h3>
+
+                <time datetime="${texto.data}">
+                    ${texto.dataExibicao}
+                </time>
+            `;
+
+            lista.appendChild(artigo);
+        });
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        lista.innerHTML =
+            "<p>não foi possível carregar os estudos.</p>";
+    }
+}
+
+carregarEstudos();
+
+</script>
+
+</body>
+</html>

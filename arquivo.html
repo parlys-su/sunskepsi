@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>arquivo — sunskepsi</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>sunskepsi</h1>
+
+    <nav>
+        <a href="index.html">início</a>
+        <a href="arquivo.html">arquivo</a>
+        <a href="fragmentos.html">fragmentos</a>
+        <a href="estudos.html">estudos</a>
+        <a href="perguntas.html">perguntas</a>
+        <a href="sobre.html">sobre</a>
+    </nav>
+</header>
+
+<main>
+
+    <section>
+
+        <h2>arquivo</h2>
+
+        <div id="lista-arquivo">
+            <p>carregando...</p>
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <span>~sun</span>
+</footer>
+
+
+<script>
+
+async function carregarArquivo() {
+
+    const lista = document.getElementById("lista-arquivo");
+
+    try {
+
+        const resposta = await fetch("posts.json");
+
+        if (!resposta.ok) {
+            throw new Error("Não foi possível carregar posts.json.");
+        }
+
+        const textos = await resposta.json();
+
+        lista.innerHTML = "";
+
+        if (textos.length === 0) {
+            lista.innerHTML = "<p>nenhum texto publicado ainda.</p>";
+            return;
+        }
+
+        textos.forEach(texto => {
+
+            const artigo = document.createElement("article");
+
+            artigo.innerHTML = `
+                <h3>
+                    <a href="${texto.link}">
+                        ${texto.titulo}
+                    </a>
+                </h3>
+
+                <time datetime="${texto.data}">
+                    ${texto.dataExibicao}
+                </time>
+            `;
+
+            lista.appendChild(artigo);
+        });
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        lista.innerHTML =
+            "<p>não foi possível carregar o arquivo.</p>";
+    }
+}
+
+carregarArquivo();
+
+</script>
+
+</body>
+</html>
