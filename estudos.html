@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>estudos — sunskepsi</title>
 
     <link rel="stylesheet" href="style.css">
@@ -13,10 +12,9 @@
 <body>
 
 <header>
-    <h1>sunskepsi</h1>
+    <h1><a href="index.html">sunskepsi</a></h1>
 
     <nav>
-        <a href="index.html">início</a>
         <a href="arquivo.html">arquivo</a>
         <a href="fragmentos.html">fragmentos</a>
         <a href="estudos.html">estudos</a>
@@ -45,62 +43,44 @@
 
 <script>
 
-async function carregarEstudos() {
+fetch("posts.json")
+    .then(response => response.json())
+    .then(posts => {
 
-    const lista = document.getElementById("lista-estudos");
+        const lista = document.getElementById("lista-estudos");
 
-    try {
+        const postsEstudos = posts
+            .filter(post => post.categoria === "estudos")
+            .sort((a, b) => b.data.localeCompare(a.data));
 
-        const resposta = await fetch("posts.json");
-
-        if (!resposta.ok) {
-            throw new Error("Não foi possível carregar posts.json.");
-        }
-
-        const textos = await resposta.json();
-
-        const estudos = textos.filter(texto =>
-            texto.categoria === "estudos"
-        );
-
-        lista.innerHTML = "";
-
-        if (estudos.length === 0) {
-            lista.innerHTML = "<p>nenhum estudo publicado ainda.</p>";
+        if (postsEstudos.length === 0) {
+            lista.innerHTML = "<p>ainda não há estudos.</p>";
             return;
         }
 
-        estudos.forEach(texto => {
+        lista.innerHTML = postsEstudos.map(post => `
+            <article>
 
-            const artigo = document.createElement("article");
-
-            artigo.innerHTML = `
                 <h3>
-                    <a href="${texto.link}">
-                        ${texto.titulo}
+                    <a href="${post.link}">
+                        ${post.titulo}
                     </a>
                 </h3>
 
-                <time datetime="${texto.data}">
-                    ${texto.dataExibicao}
+                <time datetime="${post.data}">
+                    ${post.dataExibicao}
                 </time>
-            `;
 
-            lista.appendChild(artigo);
-        });
+            </article>
+        `).join("");
 
-    } catch (erro) {
-
-        console.error(erro);
-
-        lista.innerHTML =
-            "<p>não foi possível carregar os estudos.</p>";
-    }
-}
-
-carregarEstudos();
+    })
+    .catch(error => {
+        console.error("Erro ao carregar posts.json:", error);
+    });
 
 </script>
 
 </body>
+
 </html>
