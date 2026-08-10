@@ -1,0 +1,111 @@
+name: Gerar índice de publicações
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  gerar-posts:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Gerar posts.json
+        run: |
+          python <<'PY'
+          import os
+          import json
+          import re
+
+          pasta = "textos"
+          publicacoes = []
+
+          for nome in os.listdir(pasta):
+
+              if not nome.endswith(".html"):
+                  continue
+
+              if nome == "modelo.html":
+                  continue
+
+              caminho = os.path.join(pasta, nome)
+
+              with open(caminho, "r", encoding="utf-8") as arquivo:
+                  html = arquivo.read()
+
+              titulo = re.search(
+                  r'<h2[^>]*>(.*?)</h2>',
+                  html,
+                  re.DOTALL | re.IGNORECASE
+              )
+
+              data = re.search(
+                  r'<time[^>]*datetime=["\']([^"\']+)["\'][^>]*>(.*?)</time>',
+                  html,
+                  re.DOTALL | re.IGNORECASE
+              )
+
+              categoria = re.search(
+                  r'data-categoria=["\']([^"\']+)["\']',
+                  html,
+                  re.IGNORECASE
+              )
+
+              if not titulo or not data:
+                  continue
+
+              titulo_texto = re.sub(r"<[^>]+>", "", titulo.group(1)).strip()
+
+              categoria_texto = (
+                  categoria.group(1).strip()
+                  if categoria
+                  else "arquivo"
+              )
+
+              publicacoes.append({
+                  "titulo": titulo_texto,
+                  "data": data.group(1).strip(),
+                  "dataExibicao": re.sub(
+                      r"<[^>]+>",
+                      "",
+                      data.group(2)
+                  ).strip(),
+                  "categoria": categoria_texto,
+                  "link": f"textos/{nome}"
+              })
+
+          publicacoes.sort(
+              key=lambda texto: texto["data"],
+              reverse=True
+          )
+
+          with open("posts.json", "w", encoding="utf-8") as arquivo:
+              json.dump(
+                  publicacoes,
+                  arquivo,
+                  ensure_ascii=False,
+                  indent=2
+              )
+
+          PY
+
+      - name: Salvar posts.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add posts.json
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração em posts.json."
+          else
+            git commit -m "Atualizar índice de publicações"
+            git push
+          fi
