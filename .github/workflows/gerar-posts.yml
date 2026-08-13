@@ -66,7 +66,7 @@ jobs:
                 titulo.group(1)
                 ).strip()
                 else:
-                    titulo_texto = "")
+                    titulo_texto = ""
             
 
               categoria_texto = (
