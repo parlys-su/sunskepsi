@@ -1,5 +1,12 @@
 [
   {
+    "titulo": "teste",
+    "data": "2026-08-13",
+    "dataExibicao": "13.08.2026",
+    "categoria": "fragmentos",
+    "link": "textos/teste.html"
+  },
+  {
     "titulo": "sobre o medo de permanecer",
     "data": "2026-08-10",
     "dataExibicao": "10.08.2026",
