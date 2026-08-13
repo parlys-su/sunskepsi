@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>editor — sunskepsi</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>
+        <a href="index.html">sunskepsi</a>
+    </h1>
+</header>
+
+<main>
+
+    <section class="editor">
+
+        <h2>nova publicação</h2>
+
+        <form>
+
+            <label for="titulo">título</label>
+
+            <input
+                type="text"
+                id="titulo"
+                name="titulo"
+            >
+
+            <label for="categoria">categoria</label>
+
+            <select id="categoria" name="categoria">
+                <option value="arquivo">arquivo</option>
+                <option value="fragmentos">fragmentos</option>
+                <option value="estudos">estudos</option>
+                <option value="perguntas">perguntas</option>
+            </select>
+
+            <label for="data">data</label>
+
+            <input
+    type="text"
+    id="data"
+    name="data"
+    placeholder="DD.MM.AAAA"
+    maxlength="10"
+>
+
+            <label for="texto">texto</label>
+
+            <textarea
+                id="texto"
+                name="texto"
+            ></textarea>
+
+            <button type="button">
+                publicar
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+<footer>
+    <span>~sun</span>
+</footer>
+<script>
+    const formulario = document.querySelector("form");
+    const botao = document.querySelector("button");
+
+    formulario.addEventListener("submit", function (evento) {
+        evento.preventDefault();
+    });
+
+    botao.addEventListener("click", async function () {
+
+        const titulo = document.getElementById("titulo").value.trim();
+        const categoria = document.getElementById("categoria").value;
+        const data = document.getElementById("data").value.trim();
+        const texto = document.getElementById("texto").value.trim();
+
+        if (!data || !texto) {
+    alert("preencha a data e o texto.");
+    return;
+}
+
+if ((categoria === "arquivo" || categoria === "estudos") && !titulo) {
+    alert("esta categoria precisa de um título.");
+    return;
+}
+
+        const formatoData = /^(\d{2})\.(\d{2})\.(\d{4})$/;
+        const resultadoData = data.match(formatoData);
+
+        if (!resultadoData) {
+            alert("use a data no formato DD.MM.AAAA.");
+            return;
+        }
+
+        const dia = resultadoData[1];
+        const mes = resultadoData[2];
+        const ano = resultadoData[3];
+
+        const dataISO = `${ano}-${mes}-${dia}`;
+
+        const publicacao = {
+            titulo: titulo,
+            categoria: categoria,
+            data: dataISO,
+            texto: texto
+        };
+
+        try {
+
+            const resposta = await fetch(
+                "https://sunskepsi-api.fgomes-su.workers.dev",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(publicacao)
+                }
+            );
+
+            const resultado = await resposta.json();
+
+            console.log("Resposta do Worker:", resultado);
+
+            if (!resposta.ok) {
+                alert("o Worker recusou a publicação.");
+                return;
+            }
+
+            alert("o Worker recebeu a publicação.");
+
+        } catch (erro) {
+
+            console.error("Erro ao comunicar com o Worker:", erro);
+
+            alert("não foi possível conectar ao Worker.");
+        }
+    });
+</script>
+</body>
+</html>

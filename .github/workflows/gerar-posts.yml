@@ -57,11 +57,17 @@ jobs:
                   html,
                   re.IGNORECASE
               )
-
-              if not titulo or not data:
-                  continue
-
-              titulo_texto = re.sub(r"<[^>]+>", "", titulo.group(1)).strip()
+              if not data:
+                continue
+              if titulo:
+                titulo_texto = re.sub(
+                r"<[^>]+>",
+                "",
+                titulo.group(1)
+                ).strip()
+                else:
+                    titulo_texto = "")
+            
 
               categoria_texto = (
                   categoria.group(1).strip()
